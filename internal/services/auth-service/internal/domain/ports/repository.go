@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/istiak-004/myFolio-microservices/internal/domain/models"
+	"auth-service/internal/services/auth-service/internal/domain/models"
 )
 
 // UserRepository defines the interface for user persistence
