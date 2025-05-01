@@ -21,23 +21,23 @@ type AuthServiceImpl struct {
 	userRepo      ports.UserRepository
 	sessionRepo   ports.SessionRepository
 	oauthProvider ports.OAuthProvider
-	//tokenService  ports.TokenService
-	tokenExpiry time.Duration
+	tokenService  ports.TokenService
+	tokenExpiry   time.Duration
 }
 
 func NewAuthService(
 	userRepo ports.UserRepository,
 	sessionRepo ports.SessionRepository,
 	oauthProvider ports.OAuthProvider,
-	//tokenService ports.TokenService,
+	tokenService ports.TokenService,
 	tokenExpiry time.Duration,
 ) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		userRepo:      userRepo,
 		sessionRepo:   sessionRepo,
 		oauthProvider: oauthProvider,
-		//tokenService:  tokenService,
-		tokenExpiry: tokenExpiry,
+		tokenService:  tokenService,
+		tokenExpiry:   tokenExpiry,
 	}
 }
 
@@ -76,4 +76,21 @@ func (s *AuthServiceImpl) Register(ctx context.Context, email, password string) 
 	}
 
 	return user, nil
+}
+
+func (s *AuthServiceImpl) Login(ctx context.Context, email, password string) (*models.TokenPair, error) {
+	user, err := s.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil || !user.IsActive {
+		return nil, ErrInvalidCredentials
+	}
+
+	if !utils.CheckPasswordHash(password, user.PasswordHash) {
+		return nil, ErrInvalidCredentials
+	}
+
+	return
+
 }
