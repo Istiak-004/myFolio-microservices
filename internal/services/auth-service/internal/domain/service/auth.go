@@ -91,6 +91,6 @@ func (s *AuthServiceImpl) Login(ctx context.Context, email, password string) (*m
 		return nil, ErrInvalidCredentials
 	}
 
-	return
+	return s.tokenService.GenerateTokenPair(ctx, user.ID)
 
 }
