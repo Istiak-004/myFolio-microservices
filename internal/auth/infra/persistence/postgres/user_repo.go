@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"auth-service/internal/services/auth-service/internal/domain/models"
+	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/models"
 	"context"
 	"database/sql"
 	"errors"
@@ -51,7 +51,7 @@ func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
 }
 
 // GetByEmail retrieves a user by email from the database.
-func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	query := `SELECT id, first_name, last_name, email, password_hash, role, is_admin, is_super_admin, is_verified, is_active, created_at, updated_at 
 		FROM users WHERE email = $1`
 
@@ -84,7 +84,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.
 }
 
 // GetByID retrieves a user by ID from the database.
-func (r *UserRepository) GetByID(ctx context.Context, id string) (*models.User, error) {
+func (r *UserRepository) FindByID(ctx context.Context, id string) (*models.User, error) {
 	query := `SELECT id, first_name, last_name, email, password_hash, role, is_admin, is_super_admin, is_verified, is_active, created_at, updated_at 
 		FROM users WHERE id = $1`
 

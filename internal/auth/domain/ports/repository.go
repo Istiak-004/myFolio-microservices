@@ -2,9 +2,8 @@ package ports
 
 import (
 	"context"
+	
 	"time"
-
-	"auth-service/internal/services/auth-service/internal/domain/models"
 )
 
 // UserRepository defines the interface for user persistence

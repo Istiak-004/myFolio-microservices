@@ -1,0 +1,9 @@
+go 1.24.2
+
+use (
+	./internal/api-gateway
+	./internal/auth
+	./internal/content
+	./internal/notification
+	./pkg
+)

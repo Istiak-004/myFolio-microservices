@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"auth-service/internal/services/auth-service/internal/domain/models"
-	"auth-service/internal/services/auth-service/internal/domain/ports"
-	"auth-service/pkg/utils"
+	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/models"
+	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/ports"
+	"myFolio-microservices/pkg/utils"
 )
 
 var (

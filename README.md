@@ -1,6 +1,6 @@
 ## Authentication Service with Hexagonal Architecture
 
-    auth-service/
+    myFolio-microservices/
     ├── cmd/
     │   └── main.go                     # Application entry point
     ├── internal/

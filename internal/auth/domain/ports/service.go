@@ -1,7 +1,7 @@
 package ports
 
 import (
-	"auth-service/internal/services/auth-service/internal/domain/models"
+	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/models"
 	"context"
 )
 

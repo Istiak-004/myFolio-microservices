@@ -1,7 +1,7 @@
 package token
 
 import (
-	"auth-service/internal/services/auth-service/internal/domain/ports"
+	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/ports"
 	"context"
 	"crypto/rsa"
 	"fmt"
