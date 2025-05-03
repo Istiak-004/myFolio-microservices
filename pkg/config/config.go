@@ -2,8 +2,11 @@ package config
 
 import (
 	"fmt"
+	"path/filepath"
 	"sync"
 
+	"github.com/istiak-004/myFolio-microservices/pkg/logger"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -13,29 +16,91 @@ import (
 // using sync.Once to ensure that the instance is created only once
 // and is safe for concurrent use
 var (
-	instance *viper.Viper
-	once     sync.Once
+	configInstance *Config
+	once           sync.Once
+	configLogger   *logger.Logger // Package-level logger instance
 )
 
-// GetConfig returns the singleton instance of viper
-func GetConfig() *viper.Viper {
+// Config represents the application configuration
+type Config struct {
+	App      AppConfig
+	Database DatabaseConfig
+	HTTP     HTTPConfig
+	Log      LogConfig
+}
+
+// Init initializes the configuration package with logging
+func Init(serviceName string) (*Config, error) {
+	var initErr error
 	once.Do(func() {
-		instance = viper.New()
-		instance.SetConfigName("config")
-		instance.SetConfigType("yaml")
-		instance.AddConfigPath(".")
-		instance.AddConfigPath("./config")
-		instance.AutomaticEnv()
+		// Initialize logger first
+		configLogger = logger.NewLogger(serviceName)
+		configLogger.Info("Initializing configuration...")
 
-		// Set default values for configuration
-		instance.SetDefault("server.port", 8080)
-		instance.SetDefault("database.max_conns", 20)
+		configInstance = &Config{}
 
-		if err := instance.ReadInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-				panic(fmt.Errorf("Error reading config file: %s", err))
-			}
+		// Set up Viper
+		v := viper.New()
+		if err := setupViper(v); err != nil {
+			configLogger.WithError(err).Error("Failed to setup Viper configuration")
+			initErr = fmt.Errorf("failed to setup viper: %w", err)
+			return
 		}
+
+		// Load configuration
+		if err := loadConfig(v); err != nil {
+			configLogger.WithError(err).Error("Failed to load configuration")
+			initErr = fmt.Errorf("failed to load config: %w", err)
+			return
+		}
+
+		// Unmarshal configuration
+		if err := v.Unmarshal(configInstance); err != nil {
+			configLogger.WithError(err).
+				WithField("component", "config-unmarshal").
+				Error("Failed to unmarshal configuration")
+			initErr = fmt.Errorf("failed to unmarshal config: %w", err)
+			return
+		}
+
+		configLogger.WithFields(logrus.Fields{
+			"environment": configInstance.App.Environment,
+			"version":     configInstance.App.Version,
+		}).Info("Configuration initialized successfully")
 	})
-	return instance
+
+	return configInstance, initErr
+}
+
+// Get returns the configuration instance (must call Init first)
+func Get() *Config {
+	if configInstance == nil {
+		panic("config not initialized - call Init() first")
+	}
+	return configInstance
+}
+
+// setupViper configures Viper with default settings
+func setupViper(v *viper.Viper) {
+	// Set default values
+	setDefaults(v)
+
+	// Configuration file name (without extension)
+	v.SetConfigName("config")
+
+	// Configuration type
+	v.SetConfigType("yaml")
+
+	// Paths to look for the config file
+	v.AddConfigPath(".")                           // Current directory
+	v.AddConfigPath(filepath.Join("..", "config")) // Parent directory's config folder
+	v.AddConfigPath("/etc/myapp/")                 // System config directory
+	v.AddConfigPath("$HOME/.myapp")                // User config directory
+
+	// Enable environment variables
+	v.AutomaticEnv()
+	v.SetEnvPrefix("MYAPP") // Environment variables will be prefixed with MYAPP_
+
+	// Configure environment variable bindings
+	bindEnvVars(v)
 }
