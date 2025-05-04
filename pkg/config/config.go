@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/istiak-004/myFolio-microservices/pkg/logger"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -56,14 +55,14 @@ func Init(serviceName string) (*Config, error) {
 
 		// Unmarshal configuration
 		if err := v.Unmarshal(configInstance); err != nil {
-			configLogger.WithError(err).
-				WithField("component", "config-unmarshal").
+			configLogger.
+				WithFields(map[string]interface{}{"config": configInstance}).
 				Error("Failed to unmarshal configuration")
 			initErr = fmt.Errorf("failed to unmarshal config: %w", err)
 			return
 		}
 
-		configLogger.WithFields(logrus.Fields{
+		configLogger.WithFields(map[string]interface{}{
 			"environment": configInstance.App.Environment,
 			"version":     configInstance.App.Version,
 		}).Info("Configuration initialized successfully")
@@ -81,7 +80,7 @@ func Get() *Config {
 }
 
 // setupViper configures Viper with default settings
-func setupViper(v *viper.Viper) {
+func setupViper(v *viper.Viper) error {
 	// Set default values
 	setDefaults(v)
 
@@ -103,4 +102,5 @@ func setupViper(v *viper.Viper) {
 
 	// Configure environment variable bindings
 	bindEnvVars(v)
+	return nil
 }
