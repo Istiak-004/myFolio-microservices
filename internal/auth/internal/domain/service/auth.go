@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/models"
-	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/ports"
-	"myFolio-microservices/pkg/utils"
+	"github.com/istiak-004/myFolio-microservices/auth/domain/models"
+	"github.com/istiak-004/myFolio-microservices/auth/domain/ports"
+	"github.com/istiak-004/myFolio-microservices/pkg/utils"
 )
 
 var (
@@ -78,19 +78,19 @@ func (s *AuthServiceImpl) Register(ctx context.Context, email, password string) 
 	return user, nil
 }
 
-func (s *AuthServiceImpl) Login(ctx context.Context, email, password string) (*models.TokenPair, error) {
-	user, err := s.userRepo.FindByEmail(ctx, email)
-	if err != nil {
-		return nil, err
-	}
-	if user == nil || !user.IsActive {
-		return nil, ErrInvalidCredentials
-	}
+// func (s *AuthServiceImpl) Login(ctx context.Context, email, password string) (*models.TokenPair, error) {
+// 	user, err := s.userRepo.FindByEmail(ctx, email)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if user == nil || !user.IsActive {
+// 		return nil, ErrInvalidCredentials
+// 	}
 
-	if !utils.CheckPasswordHash(password, user.PasswordHash) {
-		return nil, ErrInvalidCredentials
-	}
+// 	if !utils.CheckPasswordHash(password, user.PasswordHash) {
+// 		return nil, ErrInvalidCredentials
+// 	}
 
-	return s.tokenService.GenerateTokenPair(ctx, user.ID)
+// 	return s.tokenService.GenerateTokenPair(ctx, user.ID)
 
-}
+// }

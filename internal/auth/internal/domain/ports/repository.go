@@ -2,7 +2,9 @@ package ports
 
 import (
 	"context"
-	
+
+	"github.com/istiak-004/myFolio-microservices/auth/domain/models"
+
 	"time"
 )
 

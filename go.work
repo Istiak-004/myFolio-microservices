@@ -6,4 +6,5 @@ use (
 	./internal/content
 	./internal/notification
 	./pkg
+	./cmd
 )

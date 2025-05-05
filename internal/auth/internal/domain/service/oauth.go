@@ -1,10 +1,11 @@
 package service
 
 import (
-	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/models"
-	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/ports"
 	"context"
 	"fmt"
+
+	"github.com/istiak-004/myFolio-microservices/auth/domain/models"
+	"github.com/istiak-004/myFolio-microservices/auth/domain/ports"
 )
 
 type OAuthService struct {

@@ -1,13 +1,13 @@
 package token
 
 import (
-	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/ports"
 	"context"
 	"crypto/rsa"
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/istiak-004/myFolio-microservices/auth/domain/ports"
 )
 
 type JWTTokenService struct {

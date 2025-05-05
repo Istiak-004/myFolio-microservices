@@ -1,13 +1,13 @@
 package postgres
 
 import (
-	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/models"
 	"context"
 	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/istiak-004/myFolio-microservices/auth/domain/models"
 )
 
 type UserRepository struct {

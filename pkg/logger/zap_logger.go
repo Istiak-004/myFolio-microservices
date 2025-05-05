@@ -87,9 +87,24 @@ func (l *Logger) Warn(msg string, fields ...zap.Field) {
 	l.zapLogger.Warn(msg, fields...)
 }
 
+// Panic logs a panic message
+func (l *Logger) Panic(msg string, fields ...zap.Field) {
+	l.zapLogger.Panic(msg, fields...)
+}
+
+// Fatal logs a fatal message and exits the program
+func (l *Logger) Fatal(msg string, fields ...zap.Field) {
+	l.zapLogger.Fatal(msg, fields...)
+}
+
 // Error logs an error message
 func (l *Logger) Error(msg string, fields ...zap.Field) {
 	l.zapLogger.Error(msg, fields...)
+}
+
+// ErrorField creates a zap field for an error
+func (l *Logger) ErrorFields(err error) zap.Field {
+	return zap.Error(err)
 }
 
 // Sync flushes buffered log entries

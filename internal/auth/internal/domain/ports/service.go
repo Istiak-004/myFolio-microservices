@@ -1,8 +1,9 @@
 package ports
 
 import (
-	"myFolio-microservices/internal/services/myFolio-microservices/internal/domain/models"
 	"context"
+
+	"github.com/istiak-004/myFolio-microservices/auth/domain/models"
 )
 
 // AuthService defines the core authentication service interface
