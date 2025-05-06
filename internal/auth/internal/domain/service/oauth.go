@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/istiak-004/myFolio-microservices/auth/domain/models"
-	"github.com/istiak-004/myFolio-microservices/auth/domain/ports"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/ports"
 )
 
 type OAuthService struct {

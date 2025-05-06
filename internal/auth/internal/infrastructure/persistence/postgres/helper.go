@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"fmt"
 	"strings"
 	"unicode"
 )
@@ -69,17 +68,3 @@ func splitByCase(s string) (firstName, lastName string) {
 	return
 }
 
-func main() {
-	emails := []string{
-		"john.doe@example.com",
-		"jane_doe@example.com",
-		"johndoe@example.com",
-		"johnDoe@example.com",
-		"jdoe@example.com",
-	}
-
-	for _, email := range emails {
-		firstName, lastName := ExtractPotentialNames(email)
-		fmt.Printf("Email: %-25s => First: %-10s Last: %-10s\n", email, firstName, lastName)
-	}
-}

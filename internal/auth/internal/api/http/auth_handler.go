@@ -1,6 +1,10 @@
 package http
 
-import "time"
+import (
+	"time"
+
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
+)
 
 // RegisterRequest defines the request body for registration
 type RegisterRequest struct {
@@ -22,6 +26,11 @@ type TokenResponse struct {
 	TokenType    string    `json:"token_type"`
 }
 
-type AuthHandler struct{
-	
+type AuthHandler struct {
+}
+
+func NewAuthHandler() *AuthHandler {
+	u:=models.User{}
+	println(u)
+	return &AuthHandler{}
 }

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/istiak-004/myFolio-microservices/auth/domain/models"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
 )
 
 type UserRepository struct {

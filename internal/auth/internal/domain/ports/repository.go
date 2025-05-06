@@ -3,9 +3,9 @@ package ports
 import (
 	"context"
 
-	"github.com/istiak-004/myFolio-microservices/auth/domain/models"
-
 	"time"
+
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
 )
 
 // UserRepository defines the interface for user persistence

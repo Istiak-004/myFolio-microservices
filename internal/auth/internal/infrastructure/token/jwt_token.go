@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/istiak-004/myFolio-microservices/auth/domain/ports"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/ports"
 )
 
 type JWTTokenService struct {
