@@ -4,22 +4,32 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
+	"github.com/istiak-004/myFolio-microservices/pkg/database"
+	"github.com/istiak-004/myFolio-microservices/pkg/logger"
+	"github.com/jmoiron/sqlx"
 )
 
 type UserRepository struct {
-	db *sql.DB
+	db     *sqlx.DB
+	logger *logger.Logger
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{db: db}
+func NewUserRepository(db *database.Client, logger *logger.Logger) *UserRepository {
+	dbConnect := db.GetDB()
+	return &UserRepository{
+		db:     dbConnect,
+		logger: logger,
+	}
 }
 
 // Create creates a new user in the database.
 func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
+
 	user.ID = uuid.New().String()
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
@@ -75,7 +85,7 @@ func (r *UserRepository) FindByEmail(ctx context.Context, email string) (*models
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, fmt.Errorf("no rows found for email %w", sql.ErrNoRows)
 		}
 		return nil, err
 	}

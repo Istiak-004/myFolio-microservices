@@ -97,7 +97,7 @@ func (r *BaseRepository) Exec(ctx context.Context, query string, args ...any) er
 
 // QueryRow executes a query and scans the result into destination
 // It is used for SELECT queries that return a single row
-func (r *BaseRepository) QueryRow(ctx context.Context, dest any, query string, args ...any) error {
+func (r *BaseRepository) QuerySingleRow(ctx context.Context, dest any, query string, args ...any) error {
 	err := r.db.QueryRowContext(ctx, query, args...).Scan(dest)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to execute query!")
@@ -109,7 +109,7 @@ func (r *BaseRepository) QueryRow(ctx context.Context, dest any, query string, a
 // Query executes a query and returns the rows
 // It is used for SELECT queries that return multiple rows
 // Note: You need to close the rows after using them
-func (r *BaseRepository) Query(ctx context.Context, dest any, query string, args ...any) (*sql.Rows, error) {
+func (r *BaseRepository) QueryAllRows(ctx context.Context, dest any, query string, args ...any) (*sql.Rows, error) {
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		r.logger.WithError(err).Error("Failed to execute query!")

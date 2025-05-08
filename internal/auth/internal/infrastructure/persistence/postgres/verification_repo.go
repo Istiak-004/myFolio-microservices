@@ -2,18 +2,20 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/istiak-004/myFolio-microservices/pkg/database"
+	"github.com/jmoiron/sqlx"
 )
 
 type VerificationRepository struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func NewVerificationRepository(db *sql.DB) *VerificationRepository {
-	return &VerificationRepository{db: db}
+func NewVerificationRepository(db *database.Client) *VerificationRepository {
+	dbConnect := db.GetDB()
+	return &VerificationRepository{db: dbConnect}
 }
 
 func (r *VerificationRepository) CreateEmailVerification(ctx context.Context, userID, email, token string) error {

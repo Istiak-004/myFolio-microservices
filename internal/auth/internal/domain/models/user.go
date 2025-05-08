@@ -8,7 +8,8 @@ type User struct {
 	ID           string    `json:"id" db:"id"`
 	Email        string    `json:"email" db:"email" validate:"required,email"`
 	PasswordHash string    `json:"-" db:"password_hash" validate:"required,min=8"`
-	GoogleID     string    `json:"google_id,omitempty" db:"google_id"`
+	GoogleID     string    `json:"-"`
+	GitHubID     string    `json:"-"`
 	Role         string    `json:"role" validate:"oneof=admin visitor super_admin" db:"role"`
 	FirstName    string    `json:"first_name,omitempty" db:"first_name"`
 	LastName     string    `json:"last_name,omitempty" db:"last_name"`
@@ -21,14 +22,20 @@ type User struct {
 type TokenPair struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
-	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
 }
 
+type VerificationToken struct {
+	Token     string    `json:"token"`
+	UserID    string    `json:"user_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+}
+
 type OAuthUser struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
+	ID    string `json:"id" db:"id"`
+	Email string `json:"email" db:"email"`
+	Name  string `json:"name" db:"name"`
+	
 }
 
 type OauthProviders struct {

@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	log := logger.NewLogger("Auth Service")
+	log := logger.NewLogger("Auth")
 	log.Info("Starting Auth Service", log.String("service", "auth"))
 	config, err := config.Init("Auth Service")
 	if err != nil {
