@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/istiak-004/myFolio-microservices/auth/config"
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/ports"
+	"github.com/istiak-004/myFolio-microservices/auth/pkg/security"
 	"github.com/istiak-004/myFolio-microservices/auth/pkg/token"
-	"github.com/istiak-004/myFolio-microservices/pkg/config"
 )
 
 var (
@@ -26,7 +28,7 @@ type AuthServiceImpl struct {
 	accessTokenGen   *token.JWTGenerator
 	refreshTokenGen  *token.JWTGenerator
 	mailer           ports.Mailer
-	appConfig        *config.AppConfig
+	appConfig        *config.Config
 }
 
 func NewAuthService(
@@ -36,7 +38,7 @@ func NewAuthService(
 	accessTokenGen *token.JWTGenerator,
 	refreshTokenGen *token.JWTGenerator,
 	mailer ports.Mailer,
-	appConfig *config.AppConfig,
+	appConfig *config.Config,
 ) ports.AuthService {
 	return &AuthServiceImpl{
 		userRepo:         userRepo,
@@ -49,7 +51,7 @@ func NewAuthService(
 	}
 }
 
-func (s *AuthServiceImpl) Register(ctx context.Context, email, password, name string) (*models.User, error) {
+func (s *AuthServiceImpl) Register(ctx context.Context, email, password, firstName, lastName string) (*models.User, error) {
 	// Check if email exists
 	existing, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {
@@ -68,18 +70,22 @@ func (s *AuthServiceImpl) Register(ctx context.Context, email, password, name st
 	// Create user
 	user := &models.User{
 		Email:        email,
+		FirstName:    firstName,
+		LastName:     lastName,
 		PasswordHash: hashedPassword,
-		Name:         name,
 		IsVerified:   false,
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
 		return nil, err
 	}
-
+	randKey, err := security.GenerateRandomString(32)
+	if err != nil {
+		return nil, err
+	}
 	// Generate verification token
 	verificationToken := models.VerificationToken{
-		Token:     security.GenerateRandomString(32),
+		Token:     randKey,
 		UserID:    user.ID,
 		ExpiresAt: time.Now().Add(24 * time.Hour),
 	}
@@ -90,11 +96,11 @@ func (s *AuthServiceImpl) Register(ctx context.Context, email, password, name st
 
 	// Send verification email
 	verificationURL := fmt.Sprintf("%s%s?token=%s",
-		s.appConfig.BaseURL,
-		s.appConfig.VerificationPath,
+		s.appConfig.App.BaseURL,
+		s.appConfig.App.VerificationPath,
 		verificationToken.Token)
 
-	if err := s.mailer.SendVerificationEmail(user.Email, user.Name, verificationURL); err != nil {
+	if err := s.mailer.SendVerificationEmail(user.Email, firstName+" "+lastName, verificationURL); err != nil {
 		return nil, err
 	}
 
@@ -179,7 +185,7 @@ func (s *AuthServiceImpl) generateTokens(ctx context.Context, userID string) (*m
 		return nil, err
 	}
 
-	expiresAt := time.Now().Add(s.refreshTokenGen.expiry)
+	expiresAt := time.Now().Add(s.refreshTokenGen.GetExpiry())
 	if err := s.tokenRepo.StoreRefreshToken(ctx, userID, refreshToken, expiresAt); err != nil {
 		return nil, err
 	}
@@ -187,6 +193,6 @@ func (s *AuthServiceImpl) generateTokens(ctx context.Context, userID string) (*m
 	return &models.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    int64(s.accessTokenGen.expiry.Seconds()),
+		ExpiresIn:    int(s.accessTokenGen.GetExpiry().Seconds()),
 	}, nil
 }

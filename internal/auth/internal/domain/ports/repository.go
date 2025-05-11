@@ -32,7 +32,7 @@ type VerificationRepository interface {
 // 	RevokeAllForUser(ctx context.Context, userID string) error
 // }
 
-type TokenService interface {
+type TokenRepository interface {
 	// GenerateAccessToken(userID string) (string, error)
 	GenerateRefreshToken(ctx context.Context, token string) (string, error)
 	// VerifyAccessToken(tokenString string) (string, error)
@@ -41,4 +41,5 @@ type TokenService interface {
 	RevokeRefreshToken(ctx context.Context, token string) error
 	RotateRefreshToken(ctx context.Context, oldToken string) (newToken string, err error)
 	RevokeAllForUser(ctx context.Context, userID string) error
+	GetRefreshToken(ctx context.Context, token string) (string, error)
 }

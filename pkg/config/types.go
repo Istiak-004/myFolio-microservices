@@ -1,5 +1,12 @@
 package config
 
+// Base contains global/shared configuration used across all services
+type Base struct {
+	AppName  string `mapstructure:"APP_NAME"`
+	LogLevel string `mapstructure:"LOG_LEVEL"`
+	Env      string `mapstructure:"ENV"`
+}
+
 // AppConfig represents application-level configuration
 type AppConfig struct {
 	Name        string `mapstructure:"name"`

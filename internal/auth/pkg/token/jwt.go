@@ -64,6 +64,10 @@ func (g *JWTGenerator) Verify(tokenString string) (string, error) {
 	return "", jwt.ErrTokenInvalidClaims
 }
 
+func (g *JWTGenerator) GetExpiry() time.Duration {
+	return g.expiry
+}
+
 // // GenerateRefreshToken generates a new refresh token for the given user ID.
 // // It generates a random string of 64 characters and stores it in the refresh token repository
 // // with an expiration time of 7 days. It returns the generated token and its expiration time.

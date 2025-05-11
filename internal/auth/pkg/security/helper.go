@@ -1,4 +1,4 @@
-package token
+package security
 
 import (
 	"crypto/rand"
@@ -6,7 +6,7 @@ import (
 )
 
 // Helper function to generate secure random strings
-func generateRandomString(length int) (string, error) {
+func GenerateRandomString(length int) (string, error) {
 	b := make([]byte, length)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
