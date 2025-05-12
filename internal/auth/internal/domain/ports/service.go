@@ -4,15 +4,16 @@ import (
 	"context"
 
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/valueobjects"
 )
 
 // AuthService defines the core authentication service interface
 type AuthService interface {
-	Register(ctx context.Context, email, password, name string) (*models.User, error)
-	Login(ctx context.Context, email, password string) (*models.TokenPair, error)
-	VerifyEmail(ctx context.Context, token string) error
-	RefreshToken(ctx context.Context, refreshToken string) (*models.TokenPair, error)
-	Logout(ctx context.Context, refreshToken string) error
+	Register(ctx context.Context, email valueobjects.Email, password valueobjects.Password, name string) (*models.User, error)
+	Login(ctx context.Context, email valueobjects.Email, password valueobjects.Password) (*models.TokenPair, error)
+	VerifyEmail(ctx context.Context, token valueobjects.Token) error
+	RefreshToken(ctx context.Context, refreshToken valueobjects.Token) (*models.TokenPair, error)
+	Logout(ctx context.Context, refreshToken valueobjects.Token) error
 }
 
 type OAuthService interface {

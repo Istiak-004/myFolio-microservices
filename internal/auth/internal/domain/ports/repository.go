@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/valueobjects"
 )
 
 // UserRepository defines the interface for user persistence
@@ -25,21 +26,12 @@ type VerificationRepository interface {
 	Delete(ctx context.Context, token string) error
 }
 
-// type RefreshTokenRepository interface {
-// 	Store(ctx context.Context, userID, token string, expiresAt time.Time) error
-// 	Get(ctx context.Context, token string) (string, time.Time, error)
-// 	Revoke(ctx context.Context, token string) error
-// 	RevokeAllForUser(ctx context.Context, userID string) error
-// }
-
 type TokenRepository interface {
-	// GenerateAccessToken(userID string) (string, error)
-	GenerateRefreshToken(ctx context.Context, token string) (string, error)
-	// VerifyAccessToken(tokenString string) (string, error)
-	StoreRefreshToken(ctx context.Context, userID, token string, expiresAt time.Time) error
-	VerifyRefreshToken(ctx context.Context, token string) (string, error)
-	RevokeRefreshToken(ctx context.Context, token string) error
-	RotateRefreshToken(ctx context.Context, oldToken string) (newToken string, err error)
+	GenerateRefreshToken(ctx context.Context, token valueobjects.Token) (string, error)
+	StoreRefreshToken(ctx context.Context, userID string, token valueobjects.Token, expiresAt time.Time) error
+	VerifyRefreshToken(ctx context.Context, token valueobjects.Token) (string, error)
+	RevokeRefreshToken(ctx context.Context, token valueobjects.Token) error
+	RotateRefreshToken(ctx context.Context, oldToken valueobjects.Token) (valueobjects.Token, error)
 	RevokeAllForUser(ctx context.Context, userID string) error
-	GetRefreshToken(ctx context.Context, token string) (string, error)
+	GetRefreshToken(ctx context.Context, token valueobjects.Token) (string, error)
 }
