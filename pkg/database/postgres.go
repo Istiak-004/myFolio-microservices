@@ -31,15 +31,15 @@ type DBConfigRepo interface {
 
 // Config holds database configuration
 type SQLConfig struct {
-	Host            string        `mapstructure:"host"`
-	Port            int           `mapstructure:"port"`
-	User            string        `mapstructure:"user"`
-	Password        string        `mapstructure:"password"`
-	Name            string        `mapstructure:"name"`
-	SSLMode         string        `mapstructure:"sslmode"`
-	MaxOpenConns    int           `mapstructure:"max_open_conns"`
-	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
-	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
+	Host            string        `mapstructure:"DB_HOST"`
+	Port            int           `mapstructure:"DB_PORT"`
+	User            string        `mapstructure:"DB_USER"`
+	Password        string        `mapstructure:"DB_PASSWORD"`
+	Name            string        `mapstructure:"DB_NAME"`
+	SSLMode         string        `mapstructure:"DB_SSL_MODE"`
+	MaxOpenConns    int           `mapstructure:"DB_MAX_OPEN_CONNS"`
+	MaxIdleConns    int           `mapstructure:"DB_MAX_IDLE_CONNS"`
+	ConnMaxLifetime time.Duration `mapstructure:"DB_CONN_MAX_LIFETIME"`
 }
 
 // New creates a new database client
