@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/istiak-004/myFolio-microservices/pkg/logger"
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -58,6 +59,14 @@ func NewRedisClient[T HasRedisCionfig](config T, logger *logger.Logger) (*RedisC
 			WriteTimeout: redisConfig.WriteTimeout,
 			PoolSize:     redisConfig.PoolSize,
 		})
+
+		// register tracing for Redis
+		// This is optional, but it helps to trace Redis commands
+		// and their execution time in your application
+		if err := redisotel.InstrumentTracing(rdb); err != nil {
+			initErr = fmt.Errorf("failed to instrument Redis for tracing: %w", err)
+			return
+		}
 
 		ctx, err := context.WithTimeout(context.Background(), redisConfig.DialTimeout)
 		if err != nil {
