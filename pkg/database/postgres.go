@@ -42,6 +42,11 @@ type SQLConfig struct {
 	ConnMaxLifetime time.Duration `mapstructure:"DB_CONN_MAX_LIFETIME"`
 }
 
+type DatabaseManager interface {
+	GetDB() *sqlx.DB
+	Close() error
+}
+
 // New creates a new database client
 func New[T DBConfigRepo](config T, logger *logger.Logger) (*Client, error) {
 	var initErr error
