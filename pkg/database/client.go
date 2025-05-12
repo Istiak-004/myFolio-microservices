@@ -15,7 +15,7 @@ type Client struct {
 	// DB is the database connection
 	db *sqlx.DB
 	// Config is the database configuration
-	config *Config
+	config *SQLConfig
 	// Logger is the logger
 	logger *logger.Logger
 }
@@ -25,8 +25,12 @@ var (
 	once     sync.Once
 )
 
+type DBConfigRepo interface {
+	GetConfig() *SQLConfig
+}
+
 // Config holds database configuration
-type Config struct {
+type SQLConfig struct {
 	Host            string        `mapstructure:"host"`
 	Port            int           `mapstructure:"port"`
 	User            string        `mapstructure:"user"`
@@ -39,11 +43,12 @@ type Config struct {
 }
 
 // New creates a new database client
-func New(config *Config, logger *logger.Logger) (*Client, error) {
+func New[T DBConfigRepo](config T, logger *logger.Logger) (*Client, error) {
 	var initErr error
 	once.Do(func() {
+		dbConfig := config.GetConfig()
 		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-			config.Host, config.Port, config.User, config.Password, config.Name, config.SSLMode)
+			dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name, dbConfig.SSLMode)
 
 		db, err := sqlx.Connect("postgres", dsn)
 		if err != nil {
@@ -51,13 +56,13 @@ func New(config *Config, logger *logger.Logger) (*Client, error) {
 			return
 		}
 
-		// Configure connection pool
-		db.SetMaxOpenConns(config.MaxOpenConns)
-		db.SetMaxIdleConns(config.MaxIdleConns)
-		db.SetConnMaxLifetime(config.ConnMaxLifetime)
+		// dbConfigure connection pool
+		db.SetMaxOpenConns(dbConfig.MaxOpenConns)
+		db.SetMaxIdleConns(dbConfig.MaxIdleConns)
+		db.SetConnMaxLifetime(dbConfig.ConnMaxLifetime)
 
 		// Set connection timeout
-		ctx, cancel := context.WithTimeout(context.Background(), config.ConnMaxLifetime)
+		ctx, cancel := context.WithTimeout(context.Background(), dbConfig.ConnMaxLifetime)
 		defer cancel()
 		// Ping the database to verify connection
 		if err := db.PingContext(ctx); err != nil {
@@ -66,7 +71,7 @@ func New(config *Config, logger *logger.Logger) (*Client, error) {
 		}
 		instance = &Client{
 			db:     db,
-			config: config,
+			config: dbConfig,
 			logger: logger,
 		}
 		logger.Info("Database connection established")
@@ -88,5 +93,3 @@ func (c *Client) Close() error {
 	}
 	return nil
 }
-
-
