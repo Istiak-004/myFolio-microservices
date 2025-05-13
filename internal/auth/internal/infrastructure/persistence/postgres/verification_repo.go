@@ -2,9 +2,8 @@ package postgres
 
 import (
 	"context"
-	"time"
 
-	"github.com/google/uuid"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
 	"github.com/istiak-004/myFolio-microservices/pkg/database"
 	"github.com/jmoiron/sqlx"
 )
@@ -14,59 +13,26 @@ type VerificationRepository struct {
 }
 
 func NewVerificationRepository(db *database.Client) *VerificationRepository {
-	dbConnect := db.GetDB()
-	return &VerificationRepository{db: dbConnect}
+	return &VerificationRepository{db: db.GetDB()}
 }
 
-func (r *VerificationRepository) CreateEmailVerification(ctx context.Context, userID, email, token string) error {
-	_, err := r.db.ExecContext(ctx,
-		`INSERT INTO email_verifications 
-		(id, user_id, email, token, expires_at) 
-		VALUES ($1, $2, $3, $4, $5)`,
-		uuid.New().String(),
-		userID,
-		email,
-		token,
-		time.Now().Add(24*time.Hour),
+func (r *VerificationRepository) Create(ctx context.Context, token *models.VerificationToken) error {
+	_, err := r.db.ExecContext(ctx, `
+        INSERT INTO verification_tokens (token, user_id, expires_at)
+        VALUES ($1, $2, $3)`,
+		token.Token, token.UserID, token.ExpiresAt,
 	)
 	return err
 }
 
-func (r *VerificationRepository) VerifyEmail(ctx context.Context, token string) (string, error) {
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return "", err
-	}
-	defer tx.Rollback()
+func (r *VerificationRepository) Get(ctx context.Context, token string) (*models.VerificationToken, error) {
+	t := &models.VerificationToken{}
+	err := r.db.QueryRowContext(ctx, `SELECT token, user_id, expires_at FROM verification_tokens WHERE token = $1`, token).
+		Scan(&t.Token, &t.UserID, &t.ExpiresAt)
+	return t, err
+}
 
-	// Get verification record
-	var userID, email string
-	err = tx.QueryRowContext(ctx,
-		`SELECT user_id, email FROM email_verifications 
-		WHERE token = $1 AND expires_at > NOW() AND used_at IS NULL`,
-		token,
-	).Scan(&userID, &email)
-	if err != nil {
-		return "", err
-	}
-
-	// Mark as used
-	_, err = tx.ExecContext(ctx,
-		`UPDATE email_verifications SET used_at = NOW() WHERE token = $1`,
-		token,
-	)
-	if err != nil {
-		return "", err
-	}
-
-	// Update user
-	_, err = tx.ExecContext(ctx,
-		`UPDATE users SET is_verified = true, updated_at = NOW() WHERE id = $1`,
-		userID,
-	)
-	if err != nil {
-		return "", err
-	}
-
-	return userID, tx.Commit()
+func (r *VerificationRepository) Delete(ctx context.Context, token string) error {
+	_, err := r.db.ExecContext(ctx, `DELETE FROM verification_tokens WHERE token = $1`, token)
+	return err
 }
