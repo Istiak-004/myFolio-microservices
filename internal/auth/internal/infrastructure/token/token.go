@@ -1,12 +1,13 @@
 package token
 
 import (
+	"context"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -17,7 +18,8 @@ var (
 	errInvalidToken = errors.New("invalid or expired token")
 )
 
-type TokenManager struct {
+// TokenManager is responsible for generating and verifying JWT tokens
+type JWTTokenManager struct {
 	privateKey *rsa.PrivateKey
 	publicKey  *rsa.PublicKey
 	issuer     string
@@ -26,12 +28,13 @@ type TokenManager struct {
 }
 
 type CustomClaims struct {
-	UserID string `json:"user_id"`
-	Role   string `json:"role"`
-	jwt.RegisteredClaims
+	UserID               string `json:"user_id"`
+	Role                 string `json:"role"`
+	jwt.RegisteredClaims        // embedded standard claims
 }
 
-func NewTokenManager(privateKeyPath, publicKeyPath, issuer string, accessTTL, refreshTTL time.Duration) (*TokenManager, error) {
+// NewTokenManager creates a new TokenManager with the given parameters
+func NewTokenManager(privateKeyPath, publicKeyPath, issuer string, accessTTL, refreshTTL time.Duration) (*JWTTokenManager, error) {
 	privateKey, err := loadPrivateKey(privateKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load private key: %w", err)
@@ -40,7 +43,7 @@ func NewTokenManager(privateKeyPath, publicKeyPath, issuer string, accessTTL, re
 	if err != nil {
 		return nil, fmt.Errorf("failed to load public key: %w", err)
 	}
-	return &TokenManager{
+	return &JWTTokenManager{
 		privateKey: privateKey,
 		publicKey:  publicKey,
 		issuer:     issuer,
@@ -49,7 +52,8 @@ func NewTokenManager(privateKeyPath, publicKeyPath, issuer string, accessTTL, re
 	}, nil
 }
 
-func (tm *TokenManager) GenerateAccessToken(userID, role string) (string, string, error) {
+// GenerateAccessToken generates a new access token for the given user ID and role
+func (tm *JWTTokenManager) GenerateAccessToken(userID, role string) (string, string, error) {
 	jti := uuid.New().String()
 	claims := CustomClaims{
 		UserID: userID,
@@ -70,7 +74,8 @@ func (tm *TokenManager) GenerateAccessToken(userID, role string) (string, string
 	return signed, jti, nil
 }
 
-func (tm *TokenManager) GenerateRefreshToken(userID string) (string, string, error) {
+// GenerateRefreshToken generates a new refresh token for the given user ID
+func (tm *JWTTokenManager) GenerateRefreshToken(userID string) (string, string, error) {
 	jti := uuid.New().String()
 	claims := jwt.RegisteredClaims{
 		ID:        jti,
@@ -87,7 +92,8 @@ func (tm *TokenManager) GenerateRefreshToken(userID string) (string, string, err
 	return signed, jti, nil
 }
 
-func (tm *TokenManager) ParseToken(tokenStr string) (*CustomClaims, error) {
+// ParseAccessToken parses and validates the access token
+func (tm *JWTTokenManager) ParseToken(tokenStr string) (*CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -104,8 +110,14 @@ func (tm *TokenManager) ParseToken(tokenStr string) (*CustomClaims, error) {
 	return claims, nil
 }
 
+// VerifyAccessToken verifies the access token and returns the claims
+func (tm *JWTTokenManager) VerifyAccessToken(ctx context.Context, tokenStr string) (*CustomClaims, error) {
+	return tm.ParseToken(tokenStr)
+}
+
+// loadPrivateKey loads the private key from the given path
 func loadPrivateKey(path string) (*rsa.PrivateKey, error) {
-	keyData, err := ioutil.ReadFile(path)
+	keyData, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -116,8 +128,9 @@ func loadPrivateKey(path string) (*rsa.PrivateKey, error) {
 	return x509.ParsePKCS1PrivateKey(block.Bytes)
 }
 
+// loadPublicKey loads the public key from the given path
 func loadPublicKey(path string) (*rsa.PublicKey, error) {
-	keyData, err := ioutil.ReadFile(path)
+	keyData, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
