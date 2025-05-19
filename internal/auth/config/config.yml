@@ -1,0 +1,86 @@
+# 🌍 Base Configuration
+# ========================
+APP_NAME: auth
+LOG_LEVEL: info
+ENV: development
+
+# ========================
+# 📦 App Config (optional extension)
+# ========================
+app:
+  name: myFolio-auth-service
+  environment: development
+  version: 1.0.0
+
+# ========================
+# 🗄️ Database Configuration
+# ========================
+postgres:
+  url: "postgres://auth_user:auth_pass@localhost:5432/auth_db?sslmode=disable"
+
+# ========================
+# 🔐 JWT Configuration
+# ========================
+jwt_issuer: "myFolio-auth"
+jwt_expiry: 15m              # Access token expiry
+jwt_refresh_expiry: 720h     # Refresh token expiry (30 days)
+jwt_private_key: "./certs/private.pem"
+jwt_public_key: "./certs/public.pem"
+
+# ========================
+# 🍪 Cookie Configuration
+# ========================
+cookie_domain: "localhost"
+
+# ========================
+# 🚀 HTTP Configuration
+# ========================
+http_port: ":8080"
+
+# ========================
+# 📥 Redis Configuration
+# ========================
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+# ========================
+# 📧 SMTP Configuration
+# ========================
+smtp:
+  host: "smtp.mailtrap.io"
+  port: 587
+  username: "your_smtp_username"
+  password: "your_smtp_password"
+  from: "no-reply@myfolio.dev"
+
+# ========================
+# 📓 Logging Configuration (optional extension)
+# ========================
+log:
+  level: info
+  format: json
+  output: stdout
+
+# ========================
+# 🔗 Database Pooling Options (optional if used separately)
+# ========================
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  name: auth_db
+  sslmode: disable
+  max_open_conns: 10
+  max_idle_conns: 5
+  conn_max_lifetime: 1h
+
+# ========================
+# 🌐 HTTP Server (Advanced Options)
+# ========================
+http:
+  port: 8080
+  timeout: 15
+  shutdown_timeout: 10

@@ -1,60 +1,59 @@
-// config/config.go
 package config
 
-import (
-	"time"
+type Redis struct {
+	Addr     string `mapstructure:"addr" validate:"required"`
+	Password string `mapstructure:"password" validate:"required"`
+	DB       int    `mapstructure:"db" validate:"required"`
+	PoolSize int    `mapstructure:"pool_size" validate:"required"`
+}
 
-	"github.com/istiak-004/myFolio-microservices/pkg/logger"
-)
+type SMTP struct {
+	Host     string `mapstructure:"host" validate:"required"`
+	Port     int    `mapstructure:"port" validate:"required"`
+	Username string `mapstructure:"username" validate:"required"`
+	Password string `mapstructure:"password" validate:"required"`
+	From     string `mapstructure:"from" validate:"required"`
+}
 
 type AuthConfig struct {
-	AppName string `mapstructure:"APP_NAME"`
-	Env     string `mapstructure:"ENV"`
-	Port    string `mapstructure:"PORT"`
-
-	DB     DBConfig
-	Redis  RedisConfig
-	SMTP   SMTPConfig
-	JWT    JWTConfig
-	OAuth  OAuthConfig
-	Logger *logger.Logger
+	App          AppConfig      `mapstructure:"app" validate:"required"`
+	Database     DatabaseConfig `mapstructure:"database" validate:"required,dive"`
+	HTTP         HTTPConfig     `mapstructure:"http" validate:"required,dive"`
+	Log          LogConfig      `mapstructure:"log" validate:"required,dive"`
+	JWTIssuer    string         `mapstructure:"jwt_issuer" validate:"required"`
+	JWTExpiry    string         `mapstructure:"jwt_expiry" validate:"required"`
+	CookieDomain string         `mapstructure:"cookie_domain" validate:"required"`
 }
 
-type DBConfig struct {
-	Host            string `mapstructure:"DB_HOST"`
-	Port            int    `mapstructure:"DB_PORT"`
-	User            string `mapstructure:"DB_USER"`
-	Password        string `mapstructure:"DB_PASSWORD"`
-	Name            string `mapstructure:"DB_NAME"`
-	SSLMode         string `mapstructure:"DB_SSL_MODE"`
-	MaxOpenConns    int    `mapstructure:"DB_MAX_OPEN_CONNS"`
-	MaxIdleConns    int    `mapstructure:"DB_MAX_IDLE_CONNS"`
-	ConnMaxLifetime string `mapstructure:"DB_CONN_MAX_LIFETIME"`
+type AppConfig struct {
+	Name        string `mapstructure:"name" validate:"required"`
+	Environment string `mapstructure:"environment" validate:"required"`
+	Version     string `mapstructure:"version" validate:"required"`
 }
 
-type RedisConfig struct {
-	Addr     string `mapstructure:"ADDR"`
-	Password string `mapstructure:"PASSWORD"`
-	DB       int    `mapstructure:"DB"`
+// DatabaseConfig represents database configuration
+type DatabaseConfig struct {
+	Host            string `mapstructure:"host" validate:"required"`
+	Port            int    `mapstructure:"port" validate:"required"`
+	User            string `mapstructure:"user" validate:"required"`
+	Password        string `mapstructure:"password" validate:"required"`
+	Name            string `mapstructure:"name" validate:"required"`
+	SSLMode         string `mapstructure:"sslmode" validate:"required"`
+	MaxOpenConns    int    `mapstructure:"max_open_conns" validate:"required"`
+	MaxIdleConns    int    `mapstructure:"max_idle_conns" validate:"required"`
+	ConnMaxLifetime string `mapstructure:"conn_max_lifetime" validate:"required"`
 }
 
-type SMTPConfig struct {
-	Host     string `mapstructure:"SMTP_HOST"`
-	Port     int    `mapstructure:"SMTP_PORT"`
-	Username string `mapstructure:"SMTP_USERNAME"`
-	Password string `mapstructure:"SMTP_PASSWORD"`
-	From     string `mapstructure:"SMTP_FROM"`
+// HTTPConfig represents HTTP server configuration
+type HTTPConfig struct {
+	Port            int `mapstructure:"port" validate:"required"`
+	Timeout         int `mapstructure:"timeout" validate:"required"`
+	ShutdownTimeout int `mapstructure:"shutdown_timeout" validate:"required"`
 }
 
-type JWTConfig struct {
-	Secret string        `mapstructure:"JWT_SECRET"`
-	Expiry time.Duration `mapstructure:"JWT_EXPIRY"`
-}
-
-type OAuthConfig struct {
-	GoogleClientID     string `mapstructure:"GOOGLE_CLIENT_ID"`
-	GoogleClientSecret string `mapstructure:"GOOGLE_CLIENT_SECRET"`
-	GithubClientID     string `mapstructure:"GITHUB_CLIENT_ID"`
-	GithubClientSecret string `mapstructure:"GITHUB_CLIENT_SECRET"`
-	RedirectURL        string `mapstructure:"REDIRECT_URL"`
+// LogConfig represents logging configuration
+type LogConfig struct {
+	Level  string `mapstructure:"level" validate:"required"`
+	Format string `mapstructure:"format" validate:"required"`
+	Output string `mapstructure:"output" validate:"required"`
 }

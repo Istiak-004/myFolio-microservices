@@ -9,12 +9,12 @@ import (
 
 // Load loads the base and service-specific config into the target object.
 // Usage: Load("auth", &AuthConfig{})
-func Load[T Config](prefix string, target T) (Base, T, error) {
+// LoadConfig loads config from a specific directory path
+func LoadConfig[T Config](prefix, configPath string, target T) (Base, T, error) {
 	v := viper.New()
 	v.SetConfigName("config")
 	v.SetConfigType("yaml")
-	v.AddConfigPath(".")
-	v.AddConfigPath("./config")
+	v.AddConfigPath(configPath)
 	v.AutomaticEnv()
 	v.SetEnvPrefix(strings.ToUpper(prefix))
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -25,7 +25,9 @@ func Load[T Config](prefix string, target T) (Base, T, error) {
 	v.SetDefault("APP_NAME", prefix)
 
 	// Optional config file
-	_ = v.ReadInConfig()
+	if err := v.ReadInConfig(); err != nil {
+		return Base{}, target, fmt.Errorf("failed to read config file: %w", err)
+	}
 
 	var base Base
 	if err := v.Unmarshal(&base); err != nil {
