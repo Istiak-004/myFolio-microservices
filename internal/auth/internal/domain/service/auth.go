@@ -42,6 +42,12 @@ func (s *authService) Register(ctx context.Context, email valueobjects.Email, pa
 	if err != nil {
 		return nil, err
 	}
+
+	existingUser, err := s.users.FindByEmail(ctx, email.String())
+	if existingUser != nil || err != nil {
+		return nil, ErrEmailExists
+	}
+
 	user := &models.User{
 		ID:           uuid.New().String(),
 		Email:        email.String(),

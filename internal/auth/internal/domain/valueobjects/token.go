@@ -5,20 +5,26 @@ import (
 	"encoding/base64"
 )
 
-type Token string
+type Token struct {
+	TokenString string
+}
 
 func NewToken() Token {
 	b := make([]byte, 32)
 	_, _ = rand.Read(b)
-	return Token(base64.URLEncoding.EncodeToString(b))
+	return Token{
+		TokenString: base64.URLEncoding.EncodeToString(b),
+	}
 }
 
 func NewTokenWithJTI(jti string) Token {
-	return Token(jti)
+	return Token{
+		TokenString: jti,
+	}
 }
 
 func (t Token) String() string {
-	return string(t)
+	return string(t.TokenString)
 }
 func (t Token) IsEmpty() bool {
 	return t.String() == ""
