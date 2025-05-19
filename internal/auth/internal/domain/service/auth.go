@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/models"
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/ports"
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/valueobjects"
@@ -42,7 +43,7 @@ func (s *authService) Register(ctx context.Context, email valueobjects.Email, pa
 		return nil, err
 	}
 	user := &models.User{
-		ID:           valueobjects.NewUUID(),
+		ID:           uuid.New().String(),
 		Email:        email.String(),
 		PasswordHash: hash,
 		IsActive:     true,
@@ -122,7 +123,7 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken valueobject
 	if err != nil {
 		return nil, err
 	}
-	access, jti, err := s.jwt.GenerateAccessToken(userID, "visitor")
+	access, _, err := s.jwt.GenerateAccessToken(userID, "visitor")
 	if err != nil {
 		return nil, err
 	}

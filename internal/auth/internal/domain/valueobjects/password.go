@@ -3,6 +3,8 @@ package valueobjects
 import (
 	"errors"
 	"unicode"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -55,3 +57,14 @@ func isStrongPassword(password string) bool {
 	}
 	return hasMinLen && hasUpper && hasLower && hasNumber && hasSymbol
 }
+
+func (p Password) Hash() (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(p.String()), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+func (p Password) Matches(hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(p.String()))
+	return err == nil
+}
+

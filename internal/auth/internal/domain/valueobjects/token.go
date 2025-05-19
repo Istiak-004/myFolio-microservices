@@ -1,26 +1,34 @@
 package valueobjects
 
 import (
-	"errors"
-	"strings"
+	"crypto/rand"
+	"encoding/base64"
 )
 
-var (
-	ErrEmptyToken = errors.New("token must not be empty")
-)
+type Token string
 
-type Token struct {
-	value string
+func NewToken() Token {
+	b := make([]byte, 32)
+	_, _ = rand.Read(b)
+	return Token(base64.URLEncoding.EncodeToString(b))
 }
 
-func NewToken(token string) (Token, error) {
-	token = strings.TrimSpace(token)
-	if token == "" {
-		return Token{}, ErrEmptyToken
-	}
-	return Token{value: token}, nil
+func NewTokenWithJTI(jti string) Token {
+	return Token(jti)
 }
 
 func (t Token) String() string {
-	return t.value
+	return string(t)
+}
+func (t Token) IsEmpty() bool {
+	return t.String() == ""
+}
+func (t Token) IsValid() bool {
+	return !t.IsEmpty()
+}
+func (t Token) IsEqual(other Token) bool {
+	return t.String() == other.String()
+}
+func (t Token) IsNotEqual(other Token) bool {
+	return !t.IsEqual(other)
 }
