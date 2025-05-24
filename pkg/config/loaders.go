@@ -38,9 +38,9 @@ func LoadConfig[T Config](prefix, configPath string, target T) (Base, T, error) 
 		return Base{}, target, fmt.Errorf("service config load failed: %w", err)
 	}
 
-	if err := target.Validate(); err != nil {
-		return Base{}, target, fmt.Errorf("service config invalid: %w", err)
-	}
+	// if err := target.Validate(); err != nil {
+	// 	return Base{}, target, fmt.Errorf("service config invalid: %w", err)
+	// }
 
 	return base, target, nil
 }

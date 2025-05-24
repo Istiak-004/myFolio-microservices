@@ -15,7 +15,7 @@ type Client struct {
 	// DB is the database connection
 	db *sqlx.DB
 	// Config is the database configuration
-	config *SQLConfig
+	config Config
 	// Logger is the logger
 	logger *logger.Logger
 }
@@ -25,21 +25,17 @@ var (
 	once     sync.Once
 )
 
-type DBConfigRepo interface {
-	GetConfig() *SQLConfig
-}
-
-// Config holds database configuration
-type SQLConfig struct {
-	Host            string        `mapstructure:"DB_HOST"`
-	Port            int           `mapstructure:"DB_PORT"`
-	User            string        `mapstructure:"DB_USER"`
-	Password        string        `mapstructure:"DB_PASSWORD"`
-	Name            string        `mapstructure:"DB_NAME"`
-	SSLMode         string        `mapstructure:"DB_SSL_MODE"`
-	MaxOpenConns    int           `mapstructure:"DB_MAX_OPEN_CONNS"`
-	MaxIdleConns    int           `mapstructure:"DB_MAX_IDLE_CONNS"`
-	ConnMaxLifetime time.Duration `mapstructure:"DB_CONN_MAX_LIFETIME"`
+// Config defines the minimum required database configuration interface
+type Config interface {
+	GetHost() string
+	GetPort() int
+	GetUser() string
+	GetPassword() string
+	GetName() string
+	GetSSLMode() string
+	GetMaxOpenConns() int
+	GetMaxIdleConns() int
+	GetConnMaxLifetime() time.Duration
 }
 
 type DatabaseManager interface {
@@ -48,12 +44,15 @@ type DatabaseManager interface {
 }
 
 // New creates a new database client
-func New[T DBConfigRepo](config T, logger *logger.Logger) (*Client, error) {
+// It uses a singleton pattern to ensure only one instance of the database client is created
+// and reused throughout the application.
+func NewDB(config Config, logger *logger.Logger) (*Client, error) {
 	var initErr error
 	once.Do(func() {
-		dbConfig := config.GetConfig()
+
 		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-			dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name, dbConfig.SSLMode)
+			config.GetHost(), config.GetPort(), config.GetUser(),
+			config.GetPassword(), config.GetName(), config.GetSSLMode())
 
 		db, err := sqlx.Connect("postgres", dsn)
 		if err != nil {
@@ -62,12 +61,12 @@ func New[T DBConfigRepo](config T, logger *logger.Logger) (*Client, error) {
 		}
 
 		// dbConfigure connection pool
-		db.SetMaxOpenConns(dbConfig.MaxOpenConns)
-		db.SetMaxIdleConns(dbConfig.MaxIdleConns)
-		db.SetConnMaxLifetime(dbConfig.ConnMaxLifetime)
+		db.SetMaxOpenConns(config.GetMaxOpenConns())
+		db.SetMaxIdleConns(config.GetMaxIdleConns())
+		db.SetConnMaxLifetime(config.GetConnMaxLifetime())
 
 		// Set connection timeout
-		ctx, cancel := context.WithTimeout(context.Background(), dbConfig.ConnMaxLifetime)
+		ctx, cancel := context.WithTimeout(context.Background(), config.GetConnMaxLifetime())
 		defer cancel()
 		// Ping the database to verify connection
 		if err := db.PingContext(ctx); err != nil {
@@ -76,10 +75,10 @@ func New[T DBConfigRepo](config T, logger *logger.Logger) (*Client, error) {
 		}
 		instance = &Client{
 			db:     db,
-			config: dbConfig,
+			config: config,
 			logger: logger,
 		}
-		logger.Info("Database connection established")
+		// logger.Info("Database connection established")
 		logger.WithComponent("database").Info("Database connection established")
 	})
 
