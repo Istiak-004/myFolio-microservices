@@ -19,6 +19,7 @@ type AuthService interface {
 type OAuthService interface {
 	AuthURL(provider string) string
 	HandleCallback(ctx context.Context, provider, code string) (*models.TokenPair, error)
+	RegisterOrLoginGoogle(ctx context.Context, email, name string) (*models.TokenPair, error)
 }
 
 type Mailer interface {

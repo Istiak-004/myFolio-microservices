@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/istiak-004/myFolio-microservices/auth/internal/api/http/utils"
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/ports"
 	"github.com/istiak-004/myFolio-microservices/auth/internal/domain/valueobjects"
 	"github.com/istiak-004/myFolio-microservices/pkg/http/middleware"
@@ -135,28 +136,15 @@ func (h *AuthHandler) HandleLogout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "logged out successfully"})
 }
 
+// setSecureRefreshCookie sets the refresh token securely as an HTTP-only cookie
+// with SameSite=Strict to prevent CSRF attacks
 func setSecureRefreshCookie(c *gin.Context, refreshToken string) {
-	c.SetCookie(
-		RefreshTokenCookieName,
-		refreshToken,
-		7*24*3600, // 7 days
-		"/",
-		"",   // domain
-		true, // Secure
-		true, // HttpOnly
-	)
+	utils.SetRefreshTokenCookie(c.Writer, refreshToken, c.Request.Host)
 	c.Writer.Header().Add("Set-Cookie", "SameSite=Strict")
 }
 
+// clearRefreshCookie deletes the refresh token cookie
 func clearRefreshCookie(c *gin.Context) {
-	c.SetCookie(
-		RefreshTokenCookieName,
-		"",
-		-1,
-		"/",
-		"",
-		true,
-		true,
-	)
+	utils.ClearRefreshTokenCookie(c.Writer, c.Request.Host)
 	c.Writer.Header().Add("Set-Cookie", "SameSite=Strict")
 }
